@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Report Generator</h1>
+        <div class="form-group">
+            <label for="sqlQuery">Prompt:</label>
+            <input type="text" id="sqlQuery" class="form-control" placeholder="Enter your SQL query">
+        </div>
+        <button id="executeSqlBtn" class="btn btn-primary">Generate Report</button>
+        <br><br>
+        <div id="spinner" class="spinner-border text-primary" role="status" style="display: none;">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div id="resultContainer" class="mt-4"></div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('executeSqlBtn').addEventListener('click', function() {
+            const query = document.getElementById('sqlQuery').value;
+            const url = 'https://localhost:7139/api/sql';
+
+            // Show the spinner
+            document.getElementById('spinner').style.display = 'block';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                renderTable(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('resultContainer').innerText = 'Error fetching data';
+            })
+            .finally(() => {
+                // Hide the spinner
+                document.getElementById('spinner').style.display = 'none';
+            });
+        });
+
+        function renderTable(data) {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerText = 'No data available';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'table table-striped';
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Create table headers
+            const headers = Object.keys(data[0]);
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.innerText = header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // Create table rows
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.innerText = row[header];
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+    </script>
+</body>
+</html>

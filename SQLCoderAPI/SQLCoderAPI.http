@@ -1,0 +1,13 @@
+﻿@SQLCoderAPI_HostAddress = https://localhost:7139
+
+GET {{SQLCoderAPI_HostAddress}}/api/sql
+Content-Type: application/json
+
+###
+
+POST {{SQLCoderAPI_HostAddress}}/api/sql
+Content-Type: application/json
+
+"Get the First Name and Last Name of People belonging to Sales"
+
+###
